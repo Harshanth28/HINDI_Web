@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hindi Tuition Premium Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- DESIGN SYSTEM & CSS VARIABLES --- */
+        :root {
+            --primary: #6D28D9;
+            --primary-light: #8B5CF6;
+            --primary-gradient: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%);
+            --accent-gold: #FBBF24;
+            --accent-gold-gradient: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
+            --silver-gradient: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
+            --bronze-gradient: linear-gradient(135deg, #FDBA74 0%, #C2410C 100%);
+            --success: #10B981;
+            --danger: #EF4444;
+            --bg-soft: #F8FAFC;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #111827;
+            --text-muted: #64748B;
+            --border-radius: 16px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 10px 25px -5px rgba(109, 40, 217, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 20px 40px -10px rgba(109, 40, 217, 0.15);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --sidebar-width: 260px;
+        }
+
+        /* --- BASE RESET & LAYOUT --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-soft);
+            color: var(--text-main);
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- GLASSMORPHISM & UTILITIES --- */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            transition: var(--transition-smooth);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
+        }
+        .glass-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* --- SIDEBAR NAVIGATION --- */
+        aside {
+            width: var(--sidebar-width);
+            background: #ffffff;
+            border-right: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: var(--transition-smooth);
+        }
+        .sidebar-brand {
+            padding: 32px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        .sidebar-brand i {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+        }
+        .sidebar-item.active a, .sidebar-item a:hover {
+            background: #F5F3FF;
+            color: var(--primary);
+        }
+
+        /* --- MAIN WRAPPER & HEADER --- */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            transition: var(--transition-smooth);
+            max-width: 1400px;
+            width: calc(100% - var(--sidebar-width));
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .nav-toggle {
+            display: none;
+            background: white;
+            border: 1px solid #E2E8F0;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* --- APP APP VIEWS (SINGLE PAGE ARCHITECTURE) --- */
+        .app-view {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .app-view.active-view {
+            display: block;
+        }
+
+        /* --- GRID & STATS CONFIGURATION --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+        }
+
+        /* --- PREMIUM ANIMATED PODIUM (LEADERBOARD) --- */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 24px;
+            margin: 60px 0 40px 0;
+            padding-bottom: 20px;
+        }
+        .podium-card {
+            text-align: center;
+            width: 260px;
+            position: relative;
+            border-radius: 24px;
+            padding: 32px 24px;
+            color: white;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-smooth);
+        }
+        .podium-card:hover {
+            transform: translateY(-12px);
+        }
+        .podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin: 0 auto 16px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            border: 4px solid white;
+            box-shadow: var(--shadow-md);
+        }
+        .podium-1 {
+            background: var(--accent-gold-gradient);
+            height: 340px;
+            order: 2;
+            z-index: 2;
+            overflow: hidden;
+        }
+        .podium-1::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite linear;
+        }
+        .podium-2 { background: var(--silver-gradient); height: 280px; order: 1; z-index: 1;}
+        .podium-3 { background: var(--bronze-gradient); height: 240px; order: 3; z-index: 1;}
+        
+        .crown {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            color: #FBBF24;
+            animation: float 2.5s infinite ease-in-out;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* --- RATING STARS SYSTEM --- */
+        .star-rating {
+            display: inline-flex;
+            gap: 4px;
+        }
+        .star-rating i {
+            cursor: pointer;
+            font-size: 20px;
+            color: #E2E8F0;
+            transition: var(--transition-smooth);
+        }
+        .star-rating i.active, .star-rating i:hover {
+            color: var(--accent-gold);
+            transform: scale(1.2);
+        }
+
+        /* --- STUDENT CARDS & GRID --- */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .student-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+        .student-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+        }
+        .avatar-circle {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .badge-rank {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #F3E8FF;
+            color: var(--primary);
+        }
+
+        /* --- FORMS & ACTION UI --- */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        .search-input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        .search-input-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1);
+        }
+        .btn-premium {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-smooth);
+        }
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            opacity: 0.95;
+        }
+
+        /* --- ATTENDANCE SYSTEM BUTTONS --- */
+        .attendance-btn-zone {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .attendance-toggle {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #E2E8F0;
+            background: white;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+        .attendance-toggle.state-present {
+            background: #E6F4EA;
+            border-color: var(--success);
+            color: #137333;
+        }
+        .attendance-toggle.state-absent {
+            background: #FCE8E6;
+            border-color: var(--danger);
+            color: #C5221F;
+        }
+
+        /* --- TIMELINE COMPONENT --- */
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+            margin-top: 24px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #E2E8F0;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 32px;
+            animation: slideUp 0.5s ease;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: -32px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* --- PRE-BUILT MODAL ARCHITECTURE --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            animation: modalScale 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        /* --- SYSTEM REPROTING TABLE STYLE --- */
+        .premium-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+        .premium-table th {
+            text-align: left;
+            padding: 16px;
+            background: #F1F5F9;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+        .premium-table td {
+            padding: 16px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        /* --- ANIMATIONS ENGINE --- */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes modalScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+        @keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -8px); } }
+        @keyframes shimmer { 0% { transform: translate(-50%, -50%) rotate(45deg); } 100% { transform: translate(50%, 50%) rotate(45deg); } }
+
+        /* --- RESPONSIVE ADAPTATION LAYER (MOBILE-FIRST) --- */
+        @media (max-width: 1024px) {
+            aside { left: -var(--sidebar-width); }
+            aside.mobile-open { left: 0; }
+            main { margin-left: 0; width: 100%; padding: 24px; }
+            .nav-toggle { display: block; }
+        }
+        @media (max-width: 768px) {
+            .podium-container { flex-direction: column; align-items: center; gap: 40px; }
+            .podium-card { width: 100%; max-width: 320px; }
+            .podium-1 { order: 1; height: auto; }
+            .podium-2 { order: 2; height: auto; }
+            .podium-3 { order: 3; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>नमस्ते Tuition</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" data-target="view-dashboard"><a href="#"><i class="fa-solid fa-house"></i>Dashboard</a></li>
+            <li class="sidebar-item" data-target="view-students"><a href="#"><i class="fa-solid fa-user-graduate"></i>Students</a></li>
+            <li class="sidebar-item" data-target="view-classes"><a href="#"><i class="fa-solid fa-calendar-days"></i>Classes</a></li>
+            <li class="sidebar-item" data-target="view-tasks"><a href="#"><i class="fa-solid fa-list-check"></i>Tasks</a></li>
+            <li class="sidebar-item" data-target="view-leaderboard"><a href="#"><i class="fa-solid fa-trophy"></i>Leaderboard</a></li>
+            <li class="sidebar-item" data-target="view-reports"><a href="#"><i class="fa-solid fa-chart-pie"></i>Reports</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <button class="nav-toggle" id="menuToggleBtn"><i class="fa-solid fa-bars"></i></button>
+            <h2 id="pageTitle" style="font-weight: 800; font-size: 28px; letter-spacing: -0.5px;">Dashboard</h2>
+            <div style="font-weight: 600; color: var(--text-muted);" id="liveClock"></div>
+        </header>
+
+        <div id="view-dashboard" class="app-view active-view">
+            <div class="stats-grid" id="dashboardStatsGrid">
+                </div>
+
+            <h3 style="font-weight:800; margin-bottom: 20px;">Top Class Performers</h3>
+            <div class="podium-container" id="dashPodium"></div>
+        </div>
+
+        <div id="view-students" class="app-view">
+            <div class="controls-row">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="studentSearch" placeholder="Search excellent students...">
+                </div>
+                <button class="btn-premium" onclick="openModal('modalStudent')"><i class="fa-solid fa-plus"></i> Add New Student</button>
+            </div>
+            <div class="items-grid" id="studentsGrid"></div>
+        </div>
+
+        <div id="view-classes" class="app-view">
+            <div class="controls-row">
+                <h3 style="font-weight:800;">Academic Operations Blueprint</h3>
+                <button class="btn-premium" onclick="openModal('modalClass')"><i class="fa-solid fa-calendar-plus"></i> Schedule Session</button>
+            </div>
+            <div class="timeline" id="classesTimeline"></div>
+        </div>
+
+        <div id="view-tasks" class="app-view">
+            <div class="controls-row">
+                <h3 style="font-weight:800;">Daily Objectives Planner</h3>
+                <button class="btn-premium" onclick="openModal('modalTask')"><i class="fa-solid fa-circle-plus"></i> Delegate Task</button>
+            </div>
+            <div class="items-grid" id="tasksGrid"></div>
+        </div>
+
+        <div id="view-leaderboard" class="app-view">
+            <div class="podium-container" id="leaderboardPodium"></div>
+            <div class="glass-card" style="margin-top: 40px; padding: 0; overflow: hidden;">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student Identity</th>
+                            <th>Total Stars Stockpile</th>
+                            <th>Avg Rating Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-reports" class="app-view">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:32px; margin-bottom:32px;">
+                <div class="glass-card">
+                    <h4 style="margin-bottom:16px; font-weight:800;">Student dossier Engine (PDF)</h4>
+                    <div class="form-group">
+                        <label>Select Target Student</label>
+                        <select id="reportStudentSelector"></select>
+                    </div>
+                    <button class="btn-premium" onclick="generateStudentPDF()"><i class="fa-solid fa-file-pdf"></i> Compile & Download PDF</button>
+                </div>
+                <div class="glass-card" style="display:flex; flex-direction:column; justify-content: space-between;">
+                    <div>
+                        <h4 style="margin-bottom:16px; font-weight:800;">Matrix Export Engine (CSV)</h4>
+                        <p style="color:var(--text-muted); font-size:14px; line-height: 1.6;">Extracts comprehensive multi-dimensional attendance arrays mapped directly with timestamp markers into cross-compatible system sheets.</p>
+                    </div>
+                    <button class="btn-premium" onclick="exportMonthlyCSV()"><i class="fa-solid fa-file-csv"></i> Dispatch Comprehensive CSV</button>
+                </div>
+            </div>
+            <div id="pdf-report-template" style="display:none; background:white; padding:40px; color:#111827;"></div>
+        </div>
+
+        <div id="view-profile" class="app-view">
+            <button class="btn-premium" style="margin-bottom: 24px; background:#64748B" onclick="switchView('view-students')"><i class="fa-solid fa-arrow-left"></i> Back to Fleet</button>
+            <div id="profileDynamicData"></div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modalStudent">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px; font-weight:800;">Register Student Artifact</h3>
+            <input type="hidden" id="editStudentId">
+            <div class="form-group"><label>Full Name</label><input type="text" id="studName" required></div>
+            <div style="display:flex; gap:16px; justify-content:flex-end;">
+                <button class="btn-premium" style="background:#E2E8F0; color:#475569;" onclick="closeModal('modalStudent')">Cancel</button>
+                <button class="btn-premium" onclick="saveStudentData()">Commit Record</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalClass">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px; font-weight:800;">Log Academic Configuration</h3>
+            <input type="hidden" id="editClassId">
+            <div class="form-group"><label>Date Matrix</label><input type="date" id="classDate" required></div>
+            <div class="form-group"><label>Start Time (HH:MM)</label><input type="time" id="classStart" required></div>
+            <div class="form-group"><label>End Time (HH:MM)</label><input type="time" id="classEnd" required></div>
+            <div style="display:flex; gap:16px; justify-content:flex-end;">
+                <button class="btn-premium" style="background:#E2E8F0; color:#475569;" onclick="closeModal('modalClass')">Cancel</button>
+                <button class="btn-premium" onclick="saveClassData()">Deploy Session</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalTask">
+        <div class="modal-box">
+            <h3 style="margin-bottom:20px; font-weight:800;">Formulate Task Parameters</h3>
+            <input type="hidden" id="editTaskId">
+            <div class="form-group"><label>Task Concept / Title</label><input type="text" id="taskTitle" required></div>
+            <div class="form-group"><label>Operational Directives</label><textarea id="taskDesc" rows="3" required></textarea></div>
+            <div class="form-group"><label>Deadline Target</label><input type="date" id="taskDate" required></div>
+            <div style="display:flex; gap:16px; justify-content:flex-end;">
+                <button class="btn-premium" style="background:#E2E8F0; color:#475569;" onclick="closeModal('modalTask')">Cancel</button>
+                <button class="btn-premium" onclick="saveTaskData()">Release Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CORE SCHEMAS INITALIZER
+        let appState = {
+            students: JSON.parse(localStorage.getItem('ht_students')) || [],
+            classes: JSON.parse(localStorage.getItem('ht_classes')) || [],
+            attendance: JSON.parse(localStorage.getItem('ht_attendance')) || {}, // Key: classId_studentId -> 'Present'/'Absent'
+            tasks: JSON.parse(localStorage.getItem('ht_tasks')) || [],
+            ratings: JSON.parse(localStorage.getItem('ht_ratings')) || {} // Key: classId_studentId -> structural mapping integer
+        };
+
+        // RUNTIME LIFECYCLE CONTROLLER
+        document.addEventListener("DOMContentLoaded", () => {
+            initSeedDataIfEmpty();
+            setupNavigationHandlers();
+            calculateRealtimeMetrics();
+            renderActiveWorkspace();
+            
+            // Set dynamic system time presentation
+            document.getElementById('liveClock').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        });
+
+        function syncStateToStorage() {
+            localStorage.setItem('ht_students', JSON.stringify(appState.students));
+            localStorage.setItem('ht_classes', JSON.stringify(appState.classes));
+            localStorage.setItem('ht_attendance', JSON.stringify(appState.attendance));
+            localStorage.setItem('ht_tasks', JSON.stringify(appState.tasks));
+            localStorage.setItem('ht_ratings', JSON.stringify(appState.ratings));
+            calculateRealtimeMetrics();
+        }
+
+        // AUTO SEED ENGINE FOR DEMONSTRATION HIGH FIDELITY
+        function initSeedDataIfEmpty() {
+            if(appState.students.length === 0) {
+                appState.students = [
+                    { id: "s1", name: "Aarav Sharma" },
+                    { id: "s2", name: "Reyansh Verma" },
+                    { id: "s3", name: "Ananya Iyer" },
+                    { id: "s4", name: "Vihaan Gupta" }
+                ];
+                appState.classes = [
+                    { id: "c1", date: "2026-06-10", start: "16:00", end: "17:30" },
+                    { id: "c2", date: "2026-06-12", start: "15:00", end: "16:30" }
+                ];
+                appState.tasks = [
+                    { id: "t1", title: "Chapter 4 Vocabulary Mastery", desc: "Read and rewrite the complex vocabulary terms five times neatly.", date: "2026-06-15" }
+                ];
+                // Map logical stars & tracking indicators
+                appState.attendance["c1_s1"] = "Present"; appState.ratings["c1_s1"] = 5;
+                appState.attendance["c1_s2"] = "Present"; appState.ratings["c1_s2"] = 4;
+                appState.attendance["c1_s3"] = "Present"; appState.ratings["c1_s3"] = 5;
+                appState.attendance["c1_s4"] = "Absent";  appState.ratings["c1_s4"] = 1;
+                appState.attendance["c2_s1"] = "Present"; appState.ratings["c2_s1"] = 5;
+                appState.attendance["c2_s2"] = "Present"; appState.ratings["c2_s2"] = 5;
+                appState.attendance["c2_s3"] = "Absent";  appState.ratings["c2_s3"] = 1;
+                appState.attendance["c2_s4"] = "Present"; appState.ratings["c2_s4"] = 4;
+                syncStateToStorage();
+            }
+        }
+
+        // VIEWPORT ROUTING ENGINE
+        function setupNavigationHandlers() {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const targetView = item.getAttribute('data-target');
+                    switchView(targetView);
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                });
+            });
+
+            document.getElementById('menuToggleBtn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('mobile-open');
+            });
+
+            document.getElementById('studentSearch').addEventListener('input', () => {
+                renderStudentsGrid();
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+            const selectedView = document.getElementById(viewId);
+            if(selectedView) {
+                selectedView.classList.add('active-view');
+                // Title Synchronizer
+                let titleMapping = {
+                    'view-dashboard': 'Dashboard Metrics Platform',
+                    'view-students': 'Student Matrix Management',
+                    'view-classes': 'Class Session Timelines',
+                    'view-tasks': 'Strategic Task Directives',
+                    'view-leaderboard': 'Global Elite Leaderboard',
+                    'view-reports': 'Analytical Export Engine',
+                    'view-profile': 'Individual Archetype Profile'
+                };
+                document.getElementById('pageTitle').innerText = titleMapping[viewId] || 'Workspace';
+                renderActiveWorkspace();
+            }
+        }
+
+        // MULTI-VARIATE COMPONENT AGGREGATOR
+        function renderActiveWorkspace() {
+            renderDashboardView();
+            renderStudentsGrid();
+            renderClassesTimeline();
+            renderTasksGrid();
+            renderLeaderboardPage();
+            populateReportSelectors();
+        }
+
+        // ANALYTICAL METRICS CALCULATIONS ENGINE
+        function getStudentComputedStats(studentId) {
+            let totalStars = 0;
+            let classCount = 0;
+            let presentCount = 0;
+            let matrixRatings = [];
+
+            appState.classes.forEach(c => {
+                const att = appState.attendance[`${c.id}_${studentId}`];
+                if(att) {
+                    classCount++;
+                    if(att === 'Present') presentCount++;
+                }
+                const rate = appState.ratings[`${c.id}_${studentId}`];
+                if(rate) {
+                    totalStars += parseInt(rate);
+                    matrixRatings.push(parseInt(rate));
+                }
+            });
+
+            return {
+                totalStars: totalStars,
+                attendanceCount: presentCount,
+                attendancePercentage: classCount > 0 ? Math.round((presentCount / classCount) * 100) : 100,
+                avgStars: matrixRatings.length > 0 ? (totalStars / matrixRatings.length).toFixed(1) : "0.0"
+            };
+        }
+
+        function getRankedStudents() {
+            return [...appState.students].map(s => {
+                return { ...s, stats: getStudentComputedStats(s.id) };
+            }).sort((a,b) => b.stats.totalStars - a.stats.totalStars || b.stats.avgStars - a.stats.avgStars);
+        }
+
+        function calculateRealtimeMetrics() {
+            const ranked = getRankedStudents();
+            const activeMonthClasses = appState.classes.length; // Simplified runtime scoping
+            let totalStarsAwarded = 0;
+            Object.values(appState.ratings).forEach(v => totalStarsAwarded += parseInt(v));
+
+            let todayPresent = 0;
+            const isoToday = new Date().toISOString().split('T')[0];
+            appState.classes.filter(c => c.date === isoToday).forEach(c => {
+                appState.students.forEach(s => {
+                    if(appState.attendance[`${c.id}_${s.id}`] === 'Present') todayPresent++;
+                });
+            });
+
+            // Re-render Dynamic Dashboard Stat Grid cards
+            const container = document.getElementById('dashboardStatsGrid');
+            if(!container) return;
+
+            const cardsData = [
+                { title: 'Total Active Enrolment', value: appState.students.length, icon: 'fa-user-graduate', color: '#6D28D9' },
+                { title: 'Classes Tracking Matrix', value: activeMonthClasses, icon: 'fa-calendar-check', color: '#10B981' },
+                { title: 'Present Check-Ins Today', value: todayPresent, icon: 'fa-clipboard-user', color: '#3B82F6' },
+                { title: 'Global Stars Released', value: totalStarsAwarded, icon: 'fa-star', color: '#FBBF24' },
+                { title: 'Reigning Champion Elite', value: ranked[0] ? ranked[0].name : 'N/A', icon: 'fa-crown', color: '#EC4899' },
+                { title: 'Peak Consistency Rating', value: ranked[0] ? `${ranked[0].stats.attendancePercentage}%` : '100%', icon: 'fa-bolt', color: '#F43F5E' }
+            ];
+
+            container.innerHTML = cardsData.map(c => `
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
+                    <div>
+                        <p style="font-size:13px; color:var(--text-muted); font-weight:600;">${c.title}</p>
+                        <h3 style="font-size:22px; font-weight:800; margin-top:2px;">${c.value}</h3>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // VIEW BUILDER: DASHBOARD & PODIUMS
+        function renderDashboardView() {
+            const ranked = getRankedStudents();
+            const dashPodium = document.getElementById('dashPodium');
+            if(!dashPodium) return;
+
+            if(ranked.length === 0) {
+                dashPodium.innerHTML = `<p style="color:var(--text-muted);">Please add students to build deployment matrix.</p>`;
+                return;
+            }
+            renderPodiumMarkup(dashPodium, ranked.slice(0, 3));
+        }
+
+        function renderPodiumMarkup(container, topThree) {
+            let html = '';
+            topThree.forEach((student, index) => {
+                const placement = index + 1;
+                const initials = student.name.split(' ').map(n => n[0]).join('');
+                
+                let rankClass = `podium-${placement}`;
+                let crownMarkup = placement === 1 ? `<div class="crown"><i class="fa-solid fa-crown"></i></div>` : '';
+
+                html += `
+                    <div class="podium-card ${rankClass}">
+                        ${crownMarkup}
+                        <div class="podium-avatar">${initials}</div>
+                        <h4 style="font-weight:800; font-size:18px; margin-bottom:4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${student.name}</h4>
+                        <p style="font-size:13px; font-weight:600; opacity:0.9;">Rank #${placement}</p>
+                        <div style="margin-top:12px; background:rgba(255,255,255,0.2); padding:6px 12px; border-radius:30px; display:inline-block; font-weight:700; font-size:14px;">
+                            <i class="fa-solid fa-star" style="color:var(--accent-gold);"></i> ${student.stats.totalStars} Stars
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // VIEW BUILDER: STUDENT INFRASTRUCTURE
+        function renderStudentsGrid() {
+            const grid = document.getElementById('studentsGrid');
+            const searchVal = document.getElementById('studentSearch').value.toLowerCase();
+            const ranked = getRankedStudents();
+
+            if(!grid) return;
+
+            let matches = ranked.filter(s => s.name.toLowerCase().includes(searchVal));
+
+            grid.innerHTML = matches.map(s => {
+                const initials = s.name.split(' ').map(n => n[0]).join('');
+                const rankPosition = ranked.findIndex(item => item.id === s.id) + 1;
+                return `
+                    <div class="glass-card student-card">
+                        <span class="badge-rank">Rank #${rankPosition}</span>
+                        <div class="student-header" onclick="viewStudentProfile('${s.id}')">
+                            <div class="avatar-circle">${initials}</div>
+                            <div>
+                                <h4 style="font-weight:700; font-size:17px;">${s.name}</h4>
+                                <p style="font-size:12px; color:var(--text-muted);">View Full Academic File &rarr;</p>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:8px; border-top:1px dashed #E2E8F0; padding-top:14px; font-size:13px;">
+                            <div><b style="color:var(--text-muted)">Stars Vault:</b> ⭐ ${s.stats.totalStars}</div>
+                            <div><b style="color:var(--text-muted)">Attendance:</b> ${s.stats.attendancePercentage}%</div>
+                        </div>
+                        <div style="display:flex; justify-content: flex-end; gap:8px; margin-top:8px;">
+                            <button class="btn-premium" style="padding:8px 14px; background:#F1F5F9; color:var(--text-main); box-shadow:none;" onclick="triggerEditStudent('${s.id}', '${s.name}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn-premium" style="padding:8px 14px; background:#FEE2E2; color:var(--danger); box-shadow:none;" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // VIEW BUILDER: TIMELINE CLASSES & ATTENDANCE INTERACTION
+        function renderClassesTimeline() {
+            const timeline = document.getElementById('classesTimeline');
+            if(!timeline) return;
+
+            if(appState.classes.length === 0) {
+                timeline.innerHTML = `<p style="color:var(--text-muted);">No interactive class matrices deployed yet.</p>`;
+                return;
+            }
+
+            // Sort timeline sequentially downwards
+            let chronologicalClasses = [...appState.classes].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            timeline.innerHTML = chronologicalClasses.map(c => {
+                return `
+                    <div class="timeline-item glass-card" style="margin-bottom:24px;">
+                        <div class="timeline-marker"></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #F1F5F9; padding-bottom:12px;">
+                            <div>
+                                <h4 style="font-weight:800; font-size:18px; color:var(--primary);"><i class="fa-solid fa-graduation-cap"></i> Session Framework</h4>
+                                <p style="font-size:13px; color:var(--text-muted); font-weight:600; margin-top:2px;"><i class="fa-solid fa-calendar"></i> ${c.date} | <i class="fa-solid fa-clock"></i> ${c.start} - ${c.end}</p>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-premium" style="padding:8px 12px; background:#F1F5F9; color:var(--text-main); box-shadow:none;" onclick="triggerEditClass('${c.id}','${c.date}','${c.start}','${c.end}')"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button class="btn-premium" style="padding:8px 12px; background:#FEE2E2; color:var(--danger); box-shadow:none;" onclick="deleteClass('${c.id}')"><i class="fa-solid fa-ban"></i></button>
+                            </div>
+                        </div>
+                        
+                        <h5 style="font-weight:700; margin-bottom:12px; font-size:14px; text-transform:uppercase; color:var(--text-muted)">Live Attendance & Performance Injector</h5>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                            ${appState.students.map(s => {
+                                const currentAttendance = appState.attendance[`${c.id}_${s.id}`] || 'Absent';
+                                const activeStars = appState.ratings[`${c.id}_${s.id}`] || 1;
+                                
+                                let attendanceBtnClass = currentAttendance === 'Present' ? 'state-present' : 'state-absent';
+
+                                return `
+                                    <div style="border: 1px solid #E2E8F0; border-radius:12px; padding:14px; background:rgba(255,255,255,0.5)">
+                                        <div style="font-weight:700; font-size:15px; margin-bottom:8px;">${s.name}</div>
+                                        <div class="attendance-btn-zone">
+                                            <button class="attendance-toggle ${attendanceBtnClass}" onclick="cycleAttendance('${c.id}','${s.id}')">
+                                                ${currentAttendance === 'Present' ? '<i class="fa-solid fa-circle-check"></i> Present' : '<i class="fa-solid fa-circle-xmark"></i> Absent'}
+                                            </button>
+                                        </div>
+                                        <div style="margin-top:12px; display:flex; align-items:center; justify-content:space-between;">
+                                            <span style="font-size:12px; font-weight:700; color:var(--text-muted)">Rating:</span>
+                                            <div class="star-rating">
+                                                ${[1,2,3,4,5].map(num => `
+                                                    <i class="fa-solid fa-star ${num <= activeStars ? 'active' : ''}" onclick="assignClassStar('${c.id}','${s.id}', ${num})"></i>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ATOMIC MATRIX INTERACTION FUNCTIONS
+        function cycleAttendance(classId, studentId) {
+            const key = `${classId}_${studentId}`;
+            appState.attendance[key] = (appState.attendance[key] === 'Present') ? 'Absent' : 'Present';
+            syncStateToStorage();
+            renderClassesTimeline();
+        }
+
+        function assignClassStar(classId, studentId, value) {
+            const key = `${classId}_${studentId}`;
+            appState.ratings[key] = value;
+            syncStateToStorage();
+            renderClassesTimeline();
+        }
+
+        // VIEW BUILDER: TASKS AGGREGATOR
+        function renderTasksGrid() {
+            const grid = document.getElementById('tasksGrid');
+            if(!grid) return;
+
+            if(appState.tasks.length === 0) {
+                grid.innerHTML = `<p style="color:var(--text-muted);">No current directives issued to students.</p>`;
+                return;
+            }
+
+            grid.innerHTML = appState.tasks.map(t => `
+                <div class="glass-card style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <span style="padding:4px 10px; background:#EEF2F6; border-radius:8px; font-size:12px; font-weight:700; color:var(--primary)"><i class="fa-solid fa-bullseye"></i> Active Goal</span>
+                            <span style="font-size:12px; color:var(--text-muted); font-weight:600;"><i class="fa-solid fa-stopwatch"></i> Due: ${t.date}</span>
+                        </div>
+                        <h4 style="font-weight:700; font-size:18px; margin-bottom:8px;">${t.title}</h4>
+                        <p style="color:var(--text-muted); font-size:14px; line-height:1.5; margin-bottom:16px;">${t.desc}</p>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px dashed #E2E8F0; padding-top:12px;">
+                        <button class="btn-premium" style="padding:6px 12px; background:#F1F5F9; color:var(--text-main); box-shadow:none;" onclick="triggerEditTask('${t.id}','${t.title}','${escape(t.desc)}','${t.date}')"><i class="fa-solid fa-eraser"></i></button>
+                        <button class="btn-premium" style="padding:6px 12px; background:#FEE2E2; color:var(--danger); box-shadow:none;" onclick="deleteTask('${t.id}')"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // VIEW BUILDER: GLOBAL RANKINGS SCREEN
+        function renderLeaderboardPage() {
+            const podium = document.getElementById('leaderboardPodium');
+            const tbody = document.getElementById('leaderboardListBody');
+            if(!podium || !tbody) return;
+
+            const ranked = getRankedStudents();
+            if(ranked.length === 0) return;
+
+            renderPodiumMarkup(podium, ranked.slice(0, 3));
+
+            // Remaining elements logic mapping
+            let remainingElements = ranked.slice(3);
+            if(remainingElements.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">No additional trailing candidates in operational logs.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = remainingElements.map((s, idx) => {
+                const placement = idx + 4;
+                return `
+                    <tr>
+                        <td style="font-weight:800; color:var(--primary);">#${placement}</td>
+                        <td style="font-weight:600;">${s.name}</td>
+                        <td><span style="font-weight:700; color:var(--accent-gold);"><i class="fa-solid fa-star"></i> ${s.stats.totalStars}</span> Stars</td>
+                        <td><b style="color:var(--success);">${s.stats.avgStars}</b> / 5.0</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // VIEW BUILDER: DETAILED HISTORICAL STUDENT DOSSIER PROFILE
+        function viewStudentProfile(studentId) {
+            const student = appState.students.find(s => s.id === studentId);
+            if(!student) return;
+
+            switchView('view-profile');
+            const stats = getStudentComputedStats(studentId);
+            const initials = student.name.split(' ').map(n => n[0]).join('');
+
+            let profileContainer = document.getElementById('profileDynamicData');
+
+            // Generate timeline elements mapping tracking matrices
+            let historyHtml = '';
+            let sortedClasses = [...appState.classes].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            sortedClasses.forEach(c => {
+                const attStatus = appState.attendance[`${c.id}_${studentId}`] || 'Absent';
+                const ratingStatus = appState.ratings[`${c.id}_${studentId}`] || 1;
+                let badgeStyle = attStatus === 'Present' ? 'background:#E6F4EA; color:#137333;' : 'background:#FCE8E6; color:#C5221F;';
+
+                historyHtml += `
+                    <div class="timeline-item glass-card" style="padding:16px 24px; margin-bottom:16px;">
+                        <div class="timeline-marker" style="background:${attStatus === 'Present' ? 'var(--success)' : 'var(--danger)'}"></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <div>
+                                <span style="font-weight:700; font-size:15px; color:var(--text-main);">${c.date}</span>
+                                <span style="font-size:13px; color:var(--text-muted); margin-left:12px;">(${c.start} - ${c.end})</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:20px;">
+                                <span style="padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; ${badgeStyle}">${attStatus}</span>
+                                <div class="star-rating">
+                                    ${[1,2,3,4,5].map(num => `<i class="fa-solid fa-star ${num <= ratingStatus ? 'active' : ''}" style="cursor:default;"></i>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if(sortedClasses.length === 0) historyHtml = '<p style="color:var(--text-muted)">No registered structural classes recorded within current local system state.</p>';
+
+            profileContainer.innerHTML = `
+                <div class="glass-card" style="background:var(--primary-gradient); color:white; display:flex; align-items:center; gap:24px; padding:40px; margin-bottom:32px;">
+                    <div class="avatar-circle" style="width:88px; height:88px; background:rgba(255,255,255,0.2); border:4px solid white; font-size:32px;">${initials}</div>
+                    <div>
+                        <h2 style="font-size:32px; font-weight:800; letter-spacing:-1px;">${student.name}</h2>
+                        <p style="opacity:0.9; margin-top:4px; font-weight:500;"><i class="fa-solid fa-fingerprint"></i> System ID Parameters Reference: ${student.id}</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background:var(--accent-gold);"><i class="fa-solid fa-star"></i></div>
+                        <div><p style="font-size:12px; color:var(--text-muted); font-weight:600;">Total Score Stars</p><h3 style="font-size:24px; font-weight:800;">${stats.totalStars}</h3></div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background:#3B82F6;"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div><p style="font-size:12px; color:var(--text-muted); font-weight:600;">Sessions Present</p><h3 style="font-size:24px; font-weight:800;">${stats.attendanceCount}</h3></div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background:var(--success);"><i class="fa-solid fa-percent"></i></div>
+                        <div><p style="font-size:12px; color:var(--text-muted); font-weight:600;">Attendance Percent</p><h3 style="font-size:24px; font-weight:800;">${stats.attendancePercentage}%</h3></div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background:var(--primary-light);"><i class="fa-solid fa-chart-line"></i></div>
+                        <div><p style="font-size:12px; color:var(--text-muted); font-weight:600;">Mean Class Output</p><h3 style="font-size:24px; font-weight:800;">${stats.avgStars} / 5.0</h3></div>
+                    </div>
+                </div>
+
+                <h3 style="font-weight:800; margin-bottom:20px; border-bottom:2px solid #E2E8F0; padding-bottom:10px;">Historical Archive Matrix Logs</h3>
+                <div class="timeline">${historyHtml}</div>
+            `;
+        }
+
+        // REPORT INTERFACE SELECTION BINDING
+        function populateReportSelectors() {
+            const selector = document.getElementById('reportStudentSelector');
+            if(!selector) return;
+            selector.innerHTML = appState.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+
+        // PREMIUM GENERATION DEPLOYMENT FRAMEWORK: PDF DOWNLOAD ENGINE
+        function generateStudentPDF() {
+            const studentId = document.getElementById('reportStudentSelector').value;
+            const student = appState.students.find(s => s.id === studentId);
+            if(!student) return;
+
+            const stats = getStudentComputedStats(studentId);
+            const reportArea = document.getElementById('pdf-report-template');
+
+            let rows = appState.classes.map(c => {
+                return `
+                    <tr>
+                        <td style="padding:10px; border-bottom:1px solid #EEE;">${c.date}</td>
+                        <td style="padding:10px; border-bottom:1px solid #EEE;">${appState.attendance[`${c.id}_${studentId}`] || 'Absent'}</td>
+                        <td style="padding:10px; border-bottom:1px solid #EEE;">⭐ ${appState.ratings[`${c.id}_${studentId}`] || 1} Stars</td>
+                    </tr>
+                `;
+            }).join('');
+
+            reportArea.innerHTML = `
+                <div style="font-family:'Helvetica Neue', Arial, sans-serif;">
+                    <div style="border-bottom:4px solid #6D28D9; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h1 style="color:#6D28D9; margin:0; font-size:28px;">नमस्ते HINDI TUITION METRICS</h1>
+                            <p style="color:#666; margin:5px 0 0 0;">Official Student Academic File Transcript</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p style="margin:0; font-weight:bold;">Date Compiled:</p>
+                            <p style="margin:5px 0 0 0; color:#666;">${new Date().toISOString().split('T')[0]}</p>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top:0; color:#111827;">Dossier Core Profile: ${student.name}</h2>
+                    <p style="color:#475569;"><b>Identifier String:</b> ${student.id}</p>
+
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:15px; margin:30px 0;">
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:15px; border-radius:8px; text-align:center;">
+                            <span style="font-size:12px; color:#64748B; font-weight:bold; display:block; margin-bottom:5px;">TOTAL STARS VAULT</span>
+                            <span style="font-size:20px; font-weight:bold; color:#FBBF24;">⭐ ${stats.totalStars}</span>
+                        </div>
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:15px; border-radius:8px; text-align:center;">
+                            <span style="font-size:12px; color:#64748B; font-weight:bold; display:block; margin-bottom:5px;">ATTENDANCE METRIC</span>
+                            <span style="font-size:20px; font-weight:bold; color:#10B981;">${stats.attendancePercentage}%</span>
+                        </div>
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:15px; border-radius:8px; text-align:center;">
+                            <span style="font-size:12px; color:#64748B; font-weight:bold; display:block; margin-bottom:5px;">SESSIONS LOGGED</span>
+                            <span style="font-size:20px; font-weight:bold; color:#3B82F6;">${stats.attendanceCount} Classes</span>
+                        </div>
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:15px; border-radius:8px; text-align:center;">
+                            <span style="font-size:12px; color:#64748B; font-weight:bold; display:block; margin-bottom:5px;">MEAN SCORE OUTPUT</span>
+                            <span style="font-size:20px; font-weight:bold; color:#6D28D9;">${stats.avgStars} / 5.0</span>
+                        </div>
+                    </div>
+
+                    <h3 style="color:#6D28D9; border-bottom:2px solid #F1F5F9; padding-bottom:8px; margin-top:4px;">Historical Performance Index Records</h3>
+                    <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                        <thead>
+                            <tr style="background:#F1F5F9; text-align:left;">
+                                <th style="padding:10px;">Session Matrix Timestamp Date</th>
+                                <th style="padding:10px;">Verification State Status</th>
+                                <th style="padding:10px;">Assigned Star Rating Metric</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+
+                    <div style="margin-top:60px; border-top:1px dashed #DDD; padding-top:20px; text-align:center; font-size:11px; color:#94A3B8;">
+                        End of Certified Analytics Local Record Database Document Block. Generated via System Secure Client Sandbox.
+                    </div>
+                </div>
+            `;
+
+            // Fire premium client transformation algorithm using target configurations
+            const configParameters = {
+                margin: 10,
+                filename: `Dossier_Report_${student.name.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(reportArea).set(configParameters).save();
+        }
+
+        // CSV EXTRACTION SYSTEM EXPORT ENGINE 
+        function exportMonthlyCSV() {
+            if(appState.classes.length === 0) {
+                alert("Aborting: System state does not possess sufficient structural classes.");
+                return;
+            }
+
+            let sortedClasses = [...appState.classes].sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+            // Build absolute CSV array matrix layout lines
+            let csvHeaders = ["Student Name"];
+            sortedClasses.forEach(c => {
+                csvHeaders.push(`${c.date} (${c.start}-${c.end})`);
+            });
+
+            let csvContent = "data:text/csv;charset=utf-8," + csvHeaders.join(",") + "\n";
+
+            appState.students.forEach(s => {
+                let rowData = [s.name];
+                sortedClasses.forEach(c => {
+                    const status = appState.attendance[`${c.id}_${s.id}`] || 'Absent';
+                    rowData.push(status === 'Present' ? "✓" : "✗");
+                });
+                csvContent += rowData.join(",") + "\n";
+            });
+
+            // Virtual hyper-anchor proxy injection loop to prompt native storage dialogue interface
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Tuition_Attendance_System_Matrix_2026.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // MULTIPLEX MODAL SYSTEM DIALOG DICTIONARY LOGIC
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+            // Clear inner variable references to avoid stale states
+            if(id === 'modalStudent') {  document.getElementById('editStudentId').value = ''; document.getElementById('studName').value = ''; }
+            if(id === 'modalClass') {  document.getElementById('editClassId').value = ''; document.getElementById('classDate').value = ''; document.getElementById('classStart').value = ''; document.getElementById('classEnd').value = ''; }
+            if(id === 'modalTask') {  document.getElementById('editTaskId').value = ''; document.getElementById('taskTitle').value = ''; document.getElementById('taskDesc').value = ''; document.getElementById('taskDate').value = ''; }
+        }
+
+        // CRUD INTERACTION LOOPS: STUDENTS
+        function saveStudentData() {
+            const idHolder = document.getElementById('editStudentId').value;
+            const nameInput = document.getElementById('studName').value.trim();
+
+            if(!nameInput) return;
+
+            if(idHolder) {
+                // Update Path Execution
+                let instance = appState.students.find(s => s.id === idHolder);
+                if(instance) instance.name = nameInput;
+            } else {
+                // Creation Path Execution
+                let newRecord = { id: 's' + Date.now(), name: nameInput };
+                appState.students.push(newRecord);
+            }
+
+            syncStateToStorage();
+            closeModal('modalStudent');
+            renderActiveWorkspace();
+        }
+
+        function triggerEditStudent(id, name) {
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('studName').value = name;
+            openModal('modalStudent');
+        }
+
+        function deleteStudent(id) {
+            if(confirm("Confirm action: Purge target student structural node entirely?")) {
+                appState.students = appState.students.filter(s => s.id !== id);
+                // Scrub reference trees to avoid storage memory leaks
+                Object.keys(appState.attendance).forEach(key => { if(key.endsWith('_' + id)) delete appState.attendance[key]; });
+                Object.keys(appState.ratings).forEach(key => { if(key.endsWith('_' + id)) delete appState.ratings[key]; });
+                syncStateToStorage();
+                renderActiveWorkspace();
+            }
+        }
+
+        // CRUD INTERACTION LOOPS: CLASSES
+        function saveClassData() {
+            const idHolder = document.getElementById('editClassId').value;
+            const cDate = document.getElementById('classDate').value;
+            const cStart = document.getElementById('classStart').value;
+            const cEnd = document.getElementById('classEnd').value;
+
+            if(!cDate || !cStart || !cEnd) return;
+
+            if(idHolder) {
+                let targetClass = appState.classes.find(c => c.id === idHolder);
+                if(targetClass) { targetClass.date = cDate; targetClass.start = cStart; targetClass.end = cEnd; }
+            } else {
+                let newClass = { id: 'c' + Date.now(), date: cDate, start: cStart, end: cEnd };
+                appState.classes.push(newClass);
+            }
+
+            syncStateToStorage();
+            closeModal('modalClass');
+            renderActiveWorkspace();
+        }
+
+        function triggerEditClass(id, date, start, end) {
+            document.getElementById('editClassId').value = id;
+            document.getElementById('classDate').value = date;
+            document.getElementById('classStart').value = start;
+            document.getElementById('classEnd').value = end;
+            openModal('modalClass');
+        }
+
+        function deleteClass(id) {
+            if(confirm("Confirm structural revocation: Delete schedule block instance entry permanently?")) {
+                appState.classes = appState.classes.filter(c => c.id !== id);
+                Object.keys(appState.attendance).forEach(key => { if(key.startsWith(id + '_')) delete appState.attendance[key]; });
+                Object.keys(appState.ratings).forEach(key => { if(key.startsWith(id + '_')) delete appState.ratings[key]; });
+                syncStateToStorage();
+                renderActiveWorkspace();
+            }
+        }
+
+        // CRUD INTERACTION LOOPS: STRATEGIC OBJECTIVE TASKS
+        function saveTaskData() {
+            const idHolder = document.getElementById('editTaskId').value;
+            const title = document.getElementById('taskTitle').value.trim();
+            const desc = document.getElementById('taskDesc').value.trim();
+            const date = document.getElementById('taskDate').value;
+
+            if(!title || !desc || !date) return;
+
+            if(idHolder) {
+                let currentTask = appState.tasks.find(t => t.id === idHolder);
+                if(currentTask) { currentTask.title = title; currentTask.desc = desc; currentTask.date = date; }
+            } else {
+                let newTask = { id: 't' + Date.now(), title: title, desc: desc, date: date };
+                appState.tasks.push(newTask);
+            }
+
+            syncStateToStorage();
+            closeModal('modalTask');
+            renderActiveWorkspace();
+        }
+
+        function triggerEditTask(id, title, desc, date) {
+            document.getElementById('editTaskId').value = id;
+            document.getElementById('taskTitle').value = title;
+            document.getElementById('taskDesc').value = unescape(desc);
+            document.getElementById('taskDate').value = date;
+            openModal('modalTask');
+        }
+
+        function deleteTask(id) {
+            if(confirm("Purge operational structural task configuration?")) {
+                appState.tasks = appState.tasks.filter(t => t.id !== id);
+                syncStateToStorage();
+                renderActiveWorkspace();
+            }
+        }
+    </script>
+</body>
+</html>
